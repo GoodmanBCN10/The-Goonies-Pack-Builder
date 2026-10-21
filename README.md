@@ -6,8 +6,7 @@
   <p>
     <a href="#-español">🇪🇸 Español</a> •
     <a href="#-english">🇬🇧 English</a> •
-    <a href="https://github.com/GoodmanBCN10/The-Goonies-OS-for-Switch">The Goonies OS</a> •
-    <a href="https://github.com/GoodmanBCN10/NS_Firmware">NS_Firmware</a>
+    <a href="https://github.com/GoodmanBCN10/The-Goonies-OS-for-Switch">The Goonies OS</a>
   </p>
 </div>
 
