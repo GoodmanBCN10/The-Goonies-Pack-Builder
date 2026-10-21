@@ -36,10 +36,10 @@
 | **Pack Base** | [`GoodmanBCN10/The-Goonies-OS-for-Switch`](https://github.com/GoodmanBCN10/The-Goonies-OS-for-Switch) | Pack CFW completo con Atmosphere, Hekate y configuración optimizada |
 | **Firmware** | [`GoodmanBCN10/NS_Firmware`](https://github.com/GoodmanBCN10/NS_Firmware) | Firmware oficial listo para instalar con Daybreak (`/Firmware X.Y.Z`) |
 | **MissionControl** | [`ndeadly/MissionControl`](https://github.com/ndeadly/MissionControl) | Uso de mandos Bluetooth (PS4, PS5, Xbox, Wii U, etc.) de forma nativa |
-| **Nextendo** | [`GoodmanBCN10/Nextendo`](https://github.com/GoodmanBCN10/Nextendo) | Mejora de conectividad de red y bloqueador de servidores de Nintendo |
-| **Quick Reboot** | [`GoodmanBCN10/Quick-Reboot-for-Nintendo-Switch`](https://github.com/GoodmanBCN10/Quick-Reboot-for-Nintendo-Switch) | Reinicio rápido a Hekate, RCM o sistema desde el Homebrew Menu |
-| **90DNS Setter** | [`GoodmanBCN10/switch-90dns-setter`](https://github.com/GoodmanBCN10/switch-90dns-setter) | Configuración automática de DNS de bloqueo en redes Wi-Fi |
-| **90DNS Tester** | [`GoodmanBCN10/Switch_90DNS_tester`](https://github.com/GoodmanBCN10/Switch_90DNS_tester) | Verificación del bloqueo de servidores de Nintendo |
+| **Nextendo (Prelude)** | [`NextendoNetwork/Prelude-Nextendo`](https://github.com/NextendoNetwork/Prelude-Nextendo) | Cliente y servicios online alternativos para Nintendo Switch con emuMMC |
+| **Quick Reboot** | [`eradicatinglove/Quick-Reboot`](https://github.com/eradicatinglove/Quick-Reboot) | Reinicio rápido a Hekate, payload CFW o apagado desde el Homebrew Menu u Overlay |
+| **90DNS Setter** | [`suchmememanyskill/switch-90dns-setter`](https://github.com/suchmememanyskill/switch-90dns-setter) | Configuración automática de servidores 90DNS en todas las redes Wi-Fi guardadas |
+| **90DNS Tester** | [`meganukebmp/Switch_90DNS_tester`](https://github.com/meganukebmp/Switch_90DNS_tester) | Verificación del bloqueo de dominios y servidores de Nintendo |
 | **Sphaira** | [`ITotalJustice/sphaira`](https://github.com/ITotalJustice/sphaira) | Homebrew Menu avanzado con gestor de archivos y temas |
 | **Ultrahand Overlay** | [`ppkantorski/Ultrahand-Overlay`](https://github.com/ppkantorski/Ultrahand-Overlay) | Menú overlay personalizable en partida |
 | **JKSV** | [`J-D-K/JKSV`](https://github.com/J-D-K/JKSV) | Gestor de partidas guardadas (saves) |
