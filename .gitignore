@@ -1,0 +1,20 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyInstaller build & distribution folders
+build/
+dist/
+*.manifest
+
+# Runtime cache & local output folders
+.cache/
+output/
+
+# Environment / IDE
+.venv/
+venv/
+ENV/
+.vscode/
+.idea/

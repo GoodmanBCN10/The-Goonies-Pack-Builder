@@ -1,0 +1,462 @@
+{
+  "schema_version": "1.4.0",
+  "project_name": "The Goonies Pack Builder",
+  "default_firmware": "23.0.1",
+  "always_latest_by_default": true,
+  "firmware_source": {
+    "repo": "GoodmanBCN10/NS_Firmware",
+    "target_folder_template": "Firmware {version}",
+    "known_releases": [
+      {
+        "tag": "23.0.1",
+        "version": "23.0.1",
+        "name": "Firmware 23.0.1",
+        "asset_name": "Firmware.23.0.1.zip",
+        "download_url": "https://github.com/GoodmanBCN10/NS_Firmware/releases/download/23.0.1/Firmware.23.0.1.zip",
+        "size_bytes": 340551764
+      },
+      {
+        "tag": "23.0.0",
+        "version": "23.0.0",
+        "name": "Firmware 23.0.0",
+        "asset_name": "Firmware.23.0.0.zip",
+        "download_url": "https://github.com/GoodmanBCN10/NS_Firmware/releases/download/23.0.0/Firmware.23.0.0.zip",
+        "size_bytes": 340421224
+      },
+      {
+        "tag": "22.5.0",
+        "version": "22.5.0",
+        "name": "Firmware 22.5.0",
+        "asset_name": "Firmware.22.5.0.zip",
+        "download_url": "https://github.com/GoodmanBCN10/NS_Firmware/releases/download/22.5.0/Firmware.22.5.0.zip",
+        "size_bytes": 340903613
+      }
+    ]
+  },
+  "base_pack_source": {
+    "repo": "GoodmanBCN10/The-Goonies-OS-for-Switch",
+    "known_releases": [
+      {
+        "tag": "v1.18",
+        "name": "The Goonies OS v1.18 (Atmosphere 1.12.1 / Hekate 6.5.4)",
+        "atmosphere": "1.12.1",
+        "hekate": "6.5.4",
+        "min_fw": "1.0.0",
+        "max_fw": "23.0.1",
+        "recommended_for_fw": ["23.0.1"],
+        "asset_name": "The.Goonies.OS.v1.18.zip",
+        "download_url": "https://github.com/GoodmanBCN10/The-Goonies-OS-for-Switch/releases/download/v1.18/The.Goonies.OS.v1.18.zip",
+        "size_bytes": 57123131
+      },
+      {
+        "tag": "v1.17",
+        "name": "The Goonies OS v1.17 (Atmosphere 1.12.0 / Hekate 6.5.4)",
+        "atmosphere": "1.12.0",
+        "hekate": "6.5.4",
+        "min_fw": "1.0.0",
+        "max_fw": "23.0.0",
+        "recommended_for_fw": ["23.0.0"],
+        "asset_name": "PackTheGoonies.v1.17.zip",
+        "download_url": "https://github.com/GoodmanBCN10/The-Goonies-OS-for-Switch/releases/download/v1.17/PackTheGoonies.v1.17.zip",
+        "size_bytes": 39542692
+      },
+      {
+        "tag": "v1.16",
+        "name": "The Goonies OS v1.16 (Atmosphere 1.11.2 / Hekate 6.5.3)",
+        "atmosphere": "1.11.2",
+        "hekate": "6.5.3",
+        "min_fw": "1.0.0",
+        "max_fw": "22.5.0",
+        "recommended_for_fw": ["22.5.0"],
+        "asset_name": "Pack.The.Goonies.v1.16.zip",
+        "download_url": "https://github.com/GoodmanBCN10/The-Goonies-OS-for-Switch/releases/download/v1.16/Pack.The.Goonies.v1.16.zip",
+        "size_bytes": 21872910
+      }
+    ]
+  },
+  "apps": [
+    {
+      "id": "mission_control",
+      "name": "MissionControl",
+      "name_en": "MissionControl",
+      "category": "Sysmodule / Mandos",
+      "category_en": "Sysmodule / Controllers",
+      "description": "Usa mandos Bluetooth de PS4, PS5, Xbox, Wii U y otros directamente en la Switch sin adaptadores.",
+      "description_en": "Use Bluetooth controllers from PS4, PS5, Xbox, Wii U and more directly on your Switch without adapters.",
+      "repo": "ndeadly/MissionControl",
+      "default_selected": true,
+      "included_in_base": false,
+      "install_type": "extract_zip_root",
+      "asset_pattern": "MissionControl-*.zip",
+      "cleanup_paths": [
+        "atmosphere/contents/010000000000bd00",
+        "atmosphere/exefs_patches/bluetooth_patches",
+        "atmosphere/exefs_patches/btm_patches",
+        "atmosphere/exefs_patches/hid_patches"
+      ],
+      "compatibility_matrix": [
+        {
+          "tag": "v0.16.0",
+          "min_fw": "1.0.0",
+          "max_fw": "23.0.1",
+          "min_atmosphere": "1.12.0",
+          "max_atmosphere": "1.12.99",
+          "asset_name": "MissionControl-0.16.0-master-71bbe2d4.zip",
+          "download_url": "https://github.com/ndeadly/MissionControl/releases/download/v0.16.0/MissionControl-0.16.0-master-71bbe2d4.zip",
+          "size_bytes": 205210
+        },
+        {
+          "tag": "v0.15.2",
+          "min_fw": "1.0.0",
+          "max_fw": "22.5.0",
+          "min_atmosphere": "1.11.0",
+          "max_atmosphere": "1.11.99",
+          "asset_name": "MissionControl-0.15.2-master-d3941d43.zip",
+          "download_url": "https://github.com/ndeadly/MissionControl/releases/download/v0.15.2/MissionControl-0.15.2-master-d3941d43.zip",
+          "size_bytes": 195069
+        },
+        {
+          "tag": "v0.15.1",
+          "min_fw": "1.0.0",
+          "max_fw": "22.1.0",
+          "min_atmosphere": "1.11.0",
+          "max_atmosphere": "1.11.99",
+          "asset_name": "MissionControl-0.15.1-master-bb54b872.zip",
+          "download_url": "https://github.com/ndeadly/MissionControl/releases/download/v0.15.1/MissionControl-0.15.1-master-bb54b872.zip",
+          "size_bytes": 178782
+        }
+      ]
+    },
+    {
+      "id": "nextendo",
+      "name": "Nextendo (Prelude)",
+      "name_en": "Nextendo (Prelude)",
+      "category": "Online / Red",
+      "category_en": "Online / Network",
+      "description": "Cliente y servicios online alternativos para Nintendo Switch con emuMMC.",
+      "description_en": "Alternative online client and services for Nintendo Switch running on emuMMC.",
+      "repo": "NextendoNetwork/Prelude-Nextendo",
+      "default_selected": true,
+      "included_in_base": true,
+      "install_type": "copy_asset",
+      "asset_pattern": "nextendo.nro",
+      "target_path": "switch/nextendo.nro",
+      "cleanup_paths": [
+        "switch/nextendo.nro",
+        "switch/nextendo"
+      ],
+      "compatibility_matrix": [
+        {
+          "tag": "v4.0.6",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "asset_name": "nextendo.nro",
+          "download_url": "https://github.com/NextendoNetwork/Prelude-Nextendo/releases/download/v4.0.6/nextendo.nro",
+          "size_bytes": 25048816
+        }
+      ]
+    },
+    {
+      "id": "dbi",
+      "name": "DBI (Versión en Ruso)",
+      "name_en": "DBI (Russian Version)",
+      "category": "Instalador / MTP",
+      "category_en": "Installer / MTP",
+      "description": "Descarga la versión en ruso del repositorio de rashevskyv. El Pack Base ya incluye DBI en Castellano por defecto (no se elimina del pack base aunque dejes desmarcada esta opción).",
+      "description_en": "Downloads the Russian version from rashevskyv's repository. The Base Pack already includes the Spanish DBI by default (it is never removed even if left unchecked).",
+      "repo": "rashevskyv/dbi",
+      "default_selected": false,
+      "included_in_base": true,
+      "keep_base_when_unselected": true,
+      "base_badge_text": "Castellano ya en Base",
+      "base_badge_text_en": "Spanish in Base Pack",
+      "install_type": "copy_asset",
+      "asset_pattern": "DBI.nro",
+      "target_path": "switch/DBI_RU.nro",
+      "cleanup_paths": [],
+      "compatibility_matrix": [
+        {
+          "tag": "912ru",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "asset_name": "DBI.nro",
+          "download_url": "https://github.com/rashevskyv/dbi/releases/download/912ru/DBI.nro",
+          "size_bytes": 16657965
+        },
+        {
+          "tag": "905ru",
+          "min_fw": "1.0.0",
+          "max_fw": "23.0.0",
+          "asset_name": "DBI.nro",
+          "download_url": "https://github.com/rashevskyv/dbi/releases/download/905ru/DBI.nro",
+          "size_bytes": 16158253
+        }
+      ]
+    },
+    {
+      "id": "sphaira",
+      "name": "Sphaira",
+      "name_en": "Sphaira",
+      "category": "Menú / Gestor Homebrew",
+      "category_en": "Homebrew Menu / Manager",
+      "description": "Menú Homebrew moderno y rápido con gestor de archivos, instalador, temas y tienda integrada.",
+      "description_en": "Fast, modern Homebrew Menu featuring a file manager, installer, themes and built-in store.",
+      "repo": "NaGaa95/sphaira",
+      "default_selected": false,
+      "included_in_base": false,
+      "install_type": "extract_zip_root",
+      "asset_pattern": "sphaira.zip",
+      "cleanup_paths": [
+        "switch/sphaira",
+        "switch/sphaira.nro"
+      ],
+      "compatibility_matrix": [
+        {
+          "tag": "1.0.8",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "asset_name": "sphaira.zip",
+          "download_url": "https://github.com/NaGaa95/sphaira/releases/download/1.0.8/sphaira.zip",
+          "size_bytes": 2369894
+        }
+      ]
+    },
+    {
+      "id": "ultrahand",
+      "name": "Ultrahand Overlay",
+      "name_en": "Ultrahand Overlay",
+      "category": "Overlay / Sistema",
+      "category_en": "Overlay / System",
+      "description": "Menú overlay personalizable (L + DPad Abajo + R3) para gestionar sysmodules, paquetes, cheats y perfiles en tiempo real.",
+      "description_en": "Customizable in-game overlay menu (L + DPad Down + R3) to manage sysmodules, packages, cheats and profiles in real time.",
+      "repo": "ppkantorski/Ultrahand-Overlay",
+      "default_selected": false,
+      "included_in_base": false,
+      "install_type": "extract_zip_root",
+      "asset_pattern": "sdout.zip",
+      "cleanup_paths": [
+        "config/ultrahand",
+        "atmosphere/contents/420000000007E51A",
+        "atmosphere/contents/420000000007E51B",
+        "atmosphere/exefs_patches/audio_mastervolume",
+        "switch/Ultrahand-Reload",
+        "switch/.overlays/ovlmenu.ovl"
+      ],
+      "compatibility_matrix": [
+        {
+          "tag": "v2.5.3",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "asset_name": "sdout.zip",
+          "download_url": "https://github.com/ppkantorski/Ultrahand-Overlay/releases/download/v2.5.3/sdout.zip",
+          "size_bytes": 939343
+        }
+      ]
+    },
+    {
+      "id": "jksv",
+      "name": "JKSV",
+      "name_en": "JKSV",
+      "category": "Partidas Guardadas",
+      "category_en": "Save Manager",
+      "description": "Gestor completo de partidas guardadas (saves): copias de seguridad, restauración y exportación.",
+      "description_en": "Complete save data manager: backup, restore and export your game saves easily.",
+      "repo": "J-D-K/JKSV",
+      "default_selected": false,
+      "included_in_base": false,
+      "install_type": "copy_asset",
+      "asset_pattern": "JKSV.nro",
+      "target_path": "switch/JKSV.nro",
+      "cleanup_paths": [
+        "switch/JKSV.nro",
+        "switch/JKSV"
+      ],
+      "compatibility_matrix": [
+        {
+          "tag": "12/02/2025",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "asset_name": "JKSV.nro",
+          "download_url": "https://github.com/J-D-K/JKSV/releases/download/12%2F02%2F2025/JKSV.nro",
+          "size_bytes": 10130471
+        }
+      ]
+    },
+    {
+      "id": "linkalho",
+      "name": "Linkalho",
+      "name_en": "Linkalho",
+      "category": "Cuentas / Sistema",
+      "category_en": "Accounts / System",
+      "description": "Vincula y desvincula cuentas de Nintendo de forma offline sin conectar a los servidores oficiales.",
+      "description_en": "Link and unlink Nintendo accounts offline without connecting to official servers.",
+      "repo": "impeeza/linkalho",
+      "default_selected": false,
+      "included_in_base": false,
+      "install_type": "extract_zip_root",
+      "asset_pattern": "linkalho-*.zip",
+      "cleanup_paths": [
+        "switch/linkalho",
+        "switch/linkalho.nro"
+      ],
+      "compatibility_matrix": [
+        {
+          "tag": "v2.0.2",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "asset_name": "linkalho-v2.0.2.zip",
+          "download_url": "https://github.com/impeeza/linkalho/releases/download/v2.0.2/linkalho-v2.0.2.zip",
+          "size_bytes": 3156396
+        }
+      ]
+    },
+    {
+      "id": "quick_reboot",
+      "name": "Quick Reboot (+ Overlay)",
+      "name_en": "Quick Reboot (+ Overlay)",
+      "category": "Utilidades",
+      "category_en": "Utilities",
+      "description": "Reinicia rápidamente a Hekate, al payload de CFW o apaga la consola desde el menú Homebrew o desde Ultrahand Overlay.",
+      "description_en": "Quickly reboot to Hekate, CFW payload or power off the console from the Homebrew Menu or Ultrahand Overlay.",
+      "repo": "eradicatinglove/Quick-Reboot",
+      "default_selected": true,
+      "included_in_base": true,
+      "install_type": "copy_multi_assets",
+      "assets_map": {
+        "Quick-Reboot.nro": "switch/Quick-Reboot.nro",
+        "Quick-Reboot.ovl": "switch/.overlays/Quick-Reboot.ovl"
+      },
+      "cleanup_paths": [
+        "switch/Quick-Reboot.nro",
+        "switch/Quick-Reboot",
+        "switch/.overlays/Quick-Reboot.ovl"
+      ],
+      "compatibility_matrix": [
+        {
+          "tag": "V2.2.0",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "assets": [
+            {
+              "asset_name": "Quick-Reboot.nro",
+              "download_url": "https://github.com/eradicatinglove/Quick-Reboot/releases/download/V2.2.0/Quick-Reboot.nro",
+              "target_path": "switch/Quick-Reboot.nro",
+              "size_bytes": 214886
+            },
+            {
+              "asset_name": "Quick-Reboot.ovl",
+              "download_url": "https://github.com/eradicatinglove/Quick-Reboot/releases/download/V2.2.0/Quick-Reboot.ovl",
+              "target_path": "switch/.overlays/Quick-Reboot.ovl",
+              "size_bytes": 266296
+            }
+          ],
+          "size_bytes": 481182
+        }
+      ]
+    },
+    {
+      "id": "dns_setter",
+      "name": "90DNS Setter",
+      "name_en": "90DNS Setter",
+      "category": "Seguridad / Red",
+      "category_en": "Security / Network",
+      "description": "Aplica automáticamente los servidores 90DNS a todas las redes Wi-Fi guardadas.",
+      "description_en": "Automatically applies 90DNS servers to all saved Wi-Fi networks.",
+      "repo": "suchmememanyskill/switch-90dns-setter",
+      "default_selected": true,
+      "included_in_base": false,
+      "install_type": "copy_asset",
+      "asset_pattern": "switch-90dns-setter.nro",
+      "target_path": "switch/switch-90dns-setter.nro",
+      "cleanup_paths": [
+        "switch/switch-90dns-setter.nro",
+        "switch/switch-90dns-setter"
+      ],
+      "compatibility_matrix": [
+        {
+          "tag": "1.0.0",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "asset_name": "switch-90dns-setter.nro",
+          "download_url": "https://github.com/suchmememanyskill/switch-90dns-setter/releases/download/1.0.0/switch-90dns-setter.nro",
+          "size_bytes": 293061
+        }
+      ]
+    },
+    {
+      "id": "dns_tester",
+      "name": "90DNS Tester",
+      "name_en": "90DNS Tester",
+      "category": "Seguridad / Red",
+      "category_en": "Security / Network",
+      "description": "Comprueba en segundos si todos los dominios de telemetría y servidores de Nintendo están correctamente bloqueados.",
+      "description_en": "Checks in seconds whether all Nintendo telemetry domains and servers are properly blocked.",
+      "repo": "meganukebmp/Switch_90DNS_tester",
+      "default_selected": true,
+      "included_in_base": false,
+      "install_type": "copy_asset",
+      "asset_pattern": "Switch_90DNS_tester.nro",
+      "target_path": "switch/Switch_90DNS_tester.nro",
+      "cleanup_paths": [
+        "switch/Switch_90DNS_tester.nro",
+        "switch/Switch_90DNS_tester"
+      ],
+      "compatibility_matrix": [
+        {
+          "tag": "v1.1.0",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "asset_name": "Switch_90DNS_tester.nro",
+          "download_url": "https://github.com/meganukebmp/Switch_90DNS_tester/releases/download/v1.1.0/Switch_90DNS_tester.nro",
+          "size_bytes": 255950
+        }
+      ]
+    }
+  ],
+  "payloads": [
+    {
+      "id": "lockpick_rcm_pro",
+      "name": "Lockpick RCM Pro",
+      "name_en": "Lockpick RCM Pro",
+      "category": "Payload / Keys",
+      "category_en": "Payload / Keys",
+      "description": "Extrae las claves (prod.keys / title.keys) con soporte de Joy-Con desde Hekate. Ya va incluido en el Pack Base (no se elimina aunque no lo marques; márcalo si quieres instalar otra versión o asegurar la última).",
+      "description_en": "Dumps console keys (prod.keys / title.keys) with Joy-Con support from Hekate. Already included in the Base Pack (never removed if unchecked; check to install/update from repository).",
+      "repo": "sthetix/Lockpick_RCM_Pro",
+      "default_selected": false,
+      "included_in_base": true,
+      "keep_base_when_unselected": true,
+      "base_badge_text": "Ya incluido en Base",
+      "base_badge_text_en": "Included in Base",
+      "install_type": "extract_zip_root",
+      "asset_pattern": "Lockpick_RCM_Pro-*.zip",
+      "cleanup_paths": [],
+      "compatibility_matrix": [
+        {
+          "tag": "2.2.0",
+          "min_fw": "23.0.0",
+          "max_fw": "23.0.1",
+          "asset_name": "Lockpick_RCM_Pro-2.2.0.zip",
+          "download_url": "https://github.com/sthetix/Lockpick_RCM_Pro/releases/download/2.2.0/Lockpick_RCM_Pro-2.2.0.zip",
+          "size_bytes": 95557
+        },
+        {
+          "tag": "2.1.0",
+          "min_fw": "22.0.0",
+          "max_fw": "22.5.0",
+          "asset_name": "Lockpick_RCM_Pro-2.1.0.zip",
+          "download_url": "https://github.com/sthetix/Lockpick_RCM_Pro/releases/download/2.1.0/Lockpick_RCM_Pro-2.1.0.zip",
+          "size_bytes": 95016
+        },
+        {
+          "tag": "1.10.1",
+          "min_fw": "1.0.0",
+          "max_fw": "21.2.0",
+          "asset_name": "Lockpick_RCM_Pro-1.10.1.zip",
+          "download_url": "https://github.com/sthetix/Lockpick_RCM_Pro/releases/download/1.10.1/Lockpick_RCM_Pro-1.10.1.zip",
+          "size_bytes": 94960
+        }
+      ]
+    }
+  ]
+}

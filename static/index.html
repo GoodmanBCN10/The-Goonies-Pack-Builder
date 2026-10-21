@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Goonies Pack Builder</title>
+  <link rel="icon" type="image/png" href="logo.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- HEADER -->
+    <header class="top-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <img src="logo.png" alt="The Goonies Logo" class="brand-logo" />
+        </div>
+        <div class="brand-texts">
+          <div class="brand-title-row">
+            <h1>THE GOONIES <span>PACK BUILDER</span></h1>
+            <span class="slogan-badge">Build Your Pack. Play Your Way.</span>
+          </div>
+          <p class="subtitle" id="txtHeroTagline">Crea tu pack personalizado de The Goonies OS, selecciona tus aplicaciones homebrew favoritas e instálalo directamente en tu Nintendo Switch mediante USB.</p>
+        </div>
+      </div>
+
+      <div class="header-badges" id="headerBadges">
+        <div class="sys-pill" id="pillFwBox" title="Versión del sistema oficial de la consola para la que se ajustarán las apps">
+          <span class="pill-label" id="lblPillFw">FIRMWARE OBJETIVO</span>
+          <strong id="badgeFw">23.0.1</strong>
+        </div>
+        <div class="sys-pill" id="pillAtmoBox" title="Atmosphere: Es el Custom Firmware (sistema modificado) que permite ejecutar homebrew en la Switch">
+          <span class="pill-label">ATMOSPHERE <span class="info-dot">?</span></span>
+          <strong id="badgeAtmo">v1.12.1</strong>
+        </div>
+        <div class="sys-pill" id="pillHekateBox" title="Hekate: Es el menú de arranque inicial desde el que conectas la microSD por USB al PC y lanzas el sistema">
+          <span class="pill-label">HEKATE <span class="info-dot">?</span></span>
+          <strong id="badgeHekate">v6.5.4</strong>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="lang-switcher" role="group" aria-label="Language selector">
+          <button type="button" class="lang-btn active" data-lang="es" id="btnLangEs">🇪🇸 ES</button>
+          <button type="button" class="lang-btn" data-lang="en" id="btnLangEn">🇬🇧 EN</button>
+        </div>
+        <button class="btn btn-secondary" id="btnOpenGlossary">
+          📘 <span id="txtBtnGlossary">Glosario / Ayuda</span>
+        </button>
+        <button class="btn btn-secondary btn-sync" id="btnSyncGh">
+          <span id="syncBtnLabel">🔄 Sincronizar GitHub</span>
+          <span id="syncNotifDot" class="notif-dot hidden"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- BARRA DE PERFILES (PRESETS) -->
+    <section class="presets-bar">
+      <div class="presets-left">
+        <span class="presets-label" id="txtPresetsLabel">Perfil rápido:</span>
+        <button class="preset-btn active" data-preset="recommended" id="presetRecommended">
+          ⭐ <span id="txtPresetRec">Recomendado</span>
+        </button>
+        <button class="preset-btn" data-preset="minimal" id="presetMinimal">
+          🪶 <span id="txtPresetMin">Mínimo (Básico)</span>
+        </button>
+        <button class="preset-btn" data-preset="full" id="presetFull">
+          🔥 <span id="txtPresetFull">Completo (Todo)</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-grid">
+      <!-- LEFT COLUMN: CONFIGURATION & CATALOG -->
+      <section class="config-column">
+        <!-- STEP 1: FIRMWARE & BASE PACK -->
+        <div class="panel">
+          <div class="panel-header">
+            <h2 id="txtStep1Title">1. Versión de Firmware y Sistema Base (The Goonies OS)</h2>
+            <span class="compat-tag" id="txtCompatBadge">Compatibilidad Automática Activa</span>
+          </div>
+
+          <!-- AVISO DE INCOMPATIBILIDAD DE FIRMWARE -->
+          <div class="incompat-alert hidden" id="fwIncompatibilityBanner">
+            <strong id="txtIncompatTitle">⚠️ Aviso de Incompatibilidad:</strong>
+            <span id="fwIncompatibilityText"></span>
+          </div>
+
+          <div class="fw-base-grid">
+            <div class="form-group">
+              <label for="selectFirmware">
+                <span id="txtLabelFwSelect">Versión de Firmware para tu Consola</span>
+                <span class="tooltip-badge" id="tipFwSelect" title="Elige el último Firmware (23.0.1) salvo que quieras mantener tu consola en una versión antigua específica.">?</span>
+              </label>
+              <select id="selectFirmware" class="select-input"></select>
+              <small class="help-text" id="txtFwHelp">
+                Las aplicaciones se ajustan automáticamente a la versión compatible con el Firmware que elijas aquí.
+              </small>
+
+              <label class="checkbox-inline" for="chkIncludeFwFiles" id="lblChkIncludeFw">
+                <input type="checkbox" id="chkIncludeFwFiles" checked />
+                <span id="txtChkIncludeFw">Copiar carpeta <code>/Firmware X.Y.Z</code> a la microSD (para actualizar con <strong>Daybreak</strong> <span class="info-dot">?</span>)</span>
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label for="selectBasePack">
+                <span id="txtLabelBaseSelect">Pack CFW Base (The Goonies OS)</span>
+                <span class="tooltip-badge" id="tipBaseSelect" title="Contiene Atmosphere, Hekate, The Goonies App y DBI en Castellano.">?</span>
+              </label>
+              <select id="selectBasePack" class="select-input"></select>
+              <div class="base-info-box" id="basePackInfoBox"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: EXTRA APPLICATIONS -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 id="txtStep2Title">2. Aplicaciones y Funciones Extras</h2>
+            </div>
+          </div>
+
+          <!-- EXPLICACIÓN FIJA EN UNA LÍNEA CLARA -->
+          <div class="grid-explainer-bar" id="txtGridExplainer">
+            💡 <strong>¿Qué se instalará?</strong> Tu consola quedará exactamente con las aplicaciones que dejes <strong>marcadas</strong> abajo (además de <em>The Goonies App</em> y <em>DBI en Castellano</em>, que van siempre incluidas en el sistema base).
+          </div>
+
+          <!-- BUSCADOR Y FILTRO POR CATEGORÍA -->
+          <div class="filter-toolbar">
+            <div class="search-box">
+              <input type="text" id="inputSearchApps" class="text-input search-input" placeholder="🔍 Buscar aplicación (ej. mandos, partidas, dns...)" />
+            </div>
+            <div class="category-pills" id="categoryFilterPills">
+              <button class="cat-pill active" data-cat="all" id="catAll">Todas</button>
+              <button class="cat-pill" data-cat="sistema" id="catSys">Sistema / Mandos</button>
+              <button class="cat-pill" data-cat="instalador" id="catInst">Instaladores / Menú</button>
+              <button class="cat-pill" data-cat="red" id="catNet">Online / Red</button>
+              <button class="cat-pill" data-cat="partidas" id="catSave">Partidas / Cuentas</button>
+            </div>
+          </div>
+
+          <div class="cards-grid" id="appsGrid"></div>
+        </div>
+
+        <!-- STEP 3: PAYLOADS -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>
+                <span id="txtStep3Title">3. Payloads de Arranque (Hekate)</span>
+                <span class="tooltip-badge" id="tipPayloads" title="Los Payloads son utilidades que se abren desde el menú 'Payloads' de Hekate antes de arrancar el sistema normal.">?</span>
+              </h2>
+              <p class="panel-sub" id="txtStep3Sub">El Pack Base ya incluye los payloads esenciales (<code>fusee.bin</code> y <code>Lockpick RCM Pro</code>) en <code>/bootloader/payloads/</code>.</p>
+            </div>
+          </div>
+
+          <div class="cards-grid payloads-grid" id="payloadsGrid"></div>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN: HEKATE USB CONNECTION & INSTALLER -->
+      <aside class="summary-column">
+        <div class="panel sticky-panel">
+          <div class="panel-header">
+            <h2 id="txtUsbPanelTitle">Conexión con la Consola (Hekate USB)</h2>
+          </div>
+
+          <!-- HEKATE INSTRUCTIONS BOX -->
+          <div class="hekate-guide-box">
+            <div class="hekate-guide-title" id="txtHekateGuideTitle">🔌 Cómo conectar tu Switch en 3 pasos:</div>
+            <ol id="listHekateSteps">
+              <li>Enciende la consola en el menú <strong>Hekate</strong>.</li>
+              <li>Toca en <code>Tools</code> &rarr; <code>USB Tools</code> &rarr; <code>SD Card</code>.</li>
+              <li>Conecta el cable USB al PC y verás tu microSD abajo.</li>
+            </ol>
+          </div>
+
+          <!-- SD DRIVE SELECTOR -->
+          <div class="sd-drive-box">
+            <div class="sd-drive-header">
+              <label for="selectSdDrive" id="txtSdDriveLabel">Unidad microSD / Consola detectada</label>
+            </div>
+            <select id="selectSdDrive" class="select-input sd-select"></select>
+            <div class="sd-drive-actions">
+              <button class="btn-xs" id="btnRefreshDrives">🔄 <span id="txtBtnRefreshSd">Detectar SD</span></button>
+              <button class="btn-xs" id="btnOpenDrive">📂 <span id="txtBtnExploreSd">Explorar</span></button>
+              <button class="btn-xs btn-eject" id="btnEjectDrive">⏏️ <span id="txtBtnEjectSd">Desconectar Consola</span></button>
+            </div>
+            <div id="sdDriveStatusBadge" class="sd-status-info">Buscando unidad microSD...</div>
+          </div>
+
+          <!-- RESUMEN DE TAMAÑO SEPARANDO CACHÉ VS A DESCARGAR -->
+          <div class="summary-stats">
+            <div class="stat-row">
+              <span id="lblSumBase">Pack CFW Base:</span>
+              <strong id="sumBasePack">v1.18</strong>
+            </div>
+            <div class="stat-row">
+              <span id="lblSumFw">Carpeta Firmware:</span>
+              <strong id="sumFirmware">23.0.1</strong>
+            </div>
+            <div class="stat-row">
+              <span id="lblSumApps">Apps / Payloads marcados:</span>
+              <strong id="sumAppsCount">0 apps</strong>
+            </div>
+            <div class="stat-row">
+              <span id="lblSumTotal">📦 Total a instalar en SD:</span>
+              <strong id="sumTotalInstallSize">~0 MB</strong>
+            </div>
+            <div class="stat-row cached-row">
+              <span id="lblSumCached">⚡ Ya en caché (en tu PC):</span>
+              <strong id="sumCachedSize">0 MB</strong>
+            </div>
+            <div class="stat-row highlight">
+              <span id="lblSumDownload">⬇️ Pendiente de descargar:</span>
+              <strong id="sumToDownloadSize">~0 MB</strong>
+            </div>
+          </div>
+
+          <!-- SD Tree Preview -->
+          <div class="tree-preview">
+            <div class="tree-title" id="txtTreeTitle">Qué se instalará en tu microSD</div>
+            <ul class="changes-list" id="changesPreviewList"></ul>
+          </div>
+
+          <div class="cache-row" style="margin-bottom: 12px;">
+            <span id="cacheInfoText">Archivos guardados en caché: 0 MB</span>
+            <button class="btn-link" id="btnClearCache">Vaciar caché</button>
+          </div>
+
+          <!-- INSTALL BUTTON -->
+          <button class="btn btn-primary btn-build" id="btnBuildPack">
+            🚀 <span id="txtBtnBuild">INSTALAR PACK EN LA CONSOLA (SD)</span>
+          </button>
+
+          <!-- PROGRESS & LOGS -->
+          <div class="build-progress-box" id="buildProgressBox">
+            <div class="progress-header">
+              <span id="progressStatusText">Esperando orden de instalación</span>
+              <strong id="progressPercentText">0%</strong>
+            </div>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
+            </div>
+            <div class="console-logs" id="consoleLogs"></div>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <!-- MODAL: GLOSARIO PARA USUARIOS NUEVOS -->
+  <div class="modal-backdrop hidden" id="glossaryModalBackdrop">
+    <div class="modal-card modal-glossary-card">
+      <div class="modal-header">
+        <h3 id="txtGlossaryModalTitle">📘 Guía Rápida y Glosario para Usuarios Nuevos</h3>
+        <button class="btn-close" id="btnCloseGlossaryModal">✕</button>
+      </div>
+      <div class="modal-body glossary-list" id="glossaryModalBody"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="btnOkGlossaryModal">¡Entendido!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: AVISO DE INSTALACIÓN LIMPIA -->
+  <div class="modal-backdrop hidden" id="confirmInstallModalBackdrop">
+    <div class="modal-card modal-warning-card">
+      <div class="modal-header">
+        <h3 id="txtConfirmModalTitle">⚠️ Aviso de Instalación Limpia en la microSD</h3>
+        <button class="btn-close" id="btnCloseConfirmModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="warning-banner">
+          <p class="warning-lead" id="txtConfirmLead">
+            Estás a punto de instalar <strong>The Goonies OS</strong> en la unidad <strong id="confirmDriveLabel">E:\</strong>
+          </p>
+          <p class="warning-detail" id="txtConfirmDetail">
+            Se realizará una <strong>instalación limpia</strong>: se eliminarán <strong>TODAS las carpetas y archivos</strong> existentes en la raíz de la microSD <strong>EXCEPTO</strong> las carpetas:
+          </p>
+          <div class="protected-folders-pills">
+            <span class="protected-pill" id="txtPillEmummc">🛡️ emuMMC (Intacta)</span>
+            <span class="protected-pill" id="txtPillNintendo">🛡️ Nintendo (Intacta)</span>
+          </div>
+          <p class="warning-note" id="txtConfirmNote">
+            Nota: Todas las descargas necesarias se verificarán primero en tu PC antes de borrar ningún archivo de la microSD. No desconectes el cable USB hasta que el proceso llegue al 100%.
+          </p>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelConfirmModal">Cancelar</button>
+          <button type="button" class="btn btn-danger-confirm" id="btnAcceptConfirmModal">
+            ✅ Sí, hacer instalación limpia ahora
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
