@@ -551,9 +551,16 @@ class PackBuilderEngine:
                     releases = r.json()
                     if not releases:
                         continue
-                    # Buscar entre las releases de GitHub la de mayor número de versión
+                    # Buscar entre las releases estables de GitHub la de mayor número de versión
+                    non_beta = [
+                        rel_item
+                        for rel_item in releases
+                        if not rel_item.get("draft")
+                        and not re.search(r"-(alpha|beta|test)", rel_item.get("tag_name", ""), re.I)
+                    ]
+                    candidate_releases = non_beta if non_beta else releases
                     releases_sorted = sorted(
-                        releases, key=lambda x: parse_version(x.get("tag_name", "")), reverse=True
+                        candidate_releases, key=lambda x: parse_version(x.get("tag_name", "")), reverse=True
                     )
                     latest_rel = releases_sorted[0]
                     tag = latest_rel.get("tag_name", "")
@@ -610,8 +617,8 @@ class PackBuilderEngine:
         install_type = item.get("install_type", "copy_asset")
         if install_type == "copy_multi_assets":
             assets_map = item.get("assets_map", {})
-            mapped_list = []
-            total_sz = 0
+            mapped_list = list(item.get("base_assets", []))
+            total_sz = sum(b.get("size_bytes", 0) for b in mapped_list)
             for a in assets:
                 if a["name"] in assets_map:
                     mapped_list.append({
@@ -1095,9 +1102,16 @@ class PackBuilderEngine:
             for f_path, target_rel in dl_files:
                 if not target_rel:
                     continue
-                dest = sd_root / target_rel
-                dest.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(f_path, dest)
+                if target_rel.startswith("@extract:"):
+                    sub_dir = target_rel.split(":", 1)[1].strip("/")
+                    extract_dest = sd_root / sub_dir if sub_dir and sub_dir != "." else sd_root
+                    extract_dest.mkdir(parents=True, exist_ok=True)
+                    with zipfile.ZipFile(f_path, "r") as zf:
+                        zf.extractall(extract_dest)
+                else:
+                    dest = sd_root / target_rel
+                    dest.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(f_path, dest)
             self.log(f"Instalado en microSD: {item_name}", progress=pct, step="apps")
             return
 

@@ -359,11 +359,19 @@ function matchesCategoryFilter(item, filterKey) {
       cat.includes("sysmodule") ||
       cat.includes("mandos") ||
       cat.includes("overlay") ||
-      cat.includes("utilidades")
+      cat.includes("utilidades") ||
+      cat.includes("overclock") ||
+      cat.includes("pantalla") ||
+      cat.includes("streaming")
     );
   }
   if (filterKey === "instalador") {
-    return cat.includes("instalador") || cat.includes("menú") || cat.includes("gestor");
+    return (
+      cat.includes("instalador") ||
+      cat.includes("menú") ||
+      cat.includes("gestor") ||
+      cat.includes("emulación")
+    );
   }
   if (filterKey === "red") {
     return cat.includes("online") || cat.includes("red") || cat.includes("seguridad");
@@ -1129,6 +1137,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("selectBasePack").addEventListener("change", (e) => {
     state.basePackTag = e.target.value;
+    state.customVersions = {};
     fetchState(true);
   });
 

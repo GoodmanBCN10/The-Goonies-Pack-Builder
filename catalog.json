@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.5.0",
+  "schema_version": "1.6.0",
   "project_name": "The Goonies Pack Builder",
   "default_firmware": "23.0.1",
   "always_latest_by_default": true,
@@ -146,6 +146,14 @@
         "switch/nextendo"
       ],
       "compatibility_matrix": [
+        {
+          "tag": "v4.0.7",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "asset_name": "nextendo.nro",
+          "download_url": "https://github.com/NextendoNetwork/Prelude-Nextendo/releases/download/v4.0.7/nextendo.nro",
+          "size_bytes": 25048816
+        },
         {
           "tag": "v4.0.6",
           "min_fw": "1.0.0",
@@ -446,6 +454,206 @@
           "asset_name": "tico.nro",
           "download_url": "https://github.com/ticohq/tico/releases/download/0.7.9/tico.nro",
           "size_bytes": 42747091
+        }
+      ]
+    },
+    {
+      "id": "sys_clk",
+      "name": "sys-clk (+ Overlay Ultrahand)",
+      "name_en": "sys-clk (+ Ultrahand Overlay)",
+      "category": "Sysmodule / Overclock",
+      "category_en": "Sysmodule / Overclock",
+      "description": "Sysmodule y overlay (edición libultrahand) para ajustar las frecuencias de CPU, GPU y memoria RAM por juego y según modo portátil o dock.",
+      "description_en": "Sysmodule and overlay (libultrahand build) to adjust CPU, GPU and RAM clock speeds per game and docked/handheld state.",
+      "repo": "ppkantorski/sys-clk",
+      "default_selected": false,
+      "included_in_base": false,
+      "install_type": "copy_multi_assets",
+      "base_assets": [
+        {
+          "asset_name": "sys-clk-2.0.1-21fix.zip",
+          "download_url": "https://github.com/retronx-team/sys-clk/releases/download/2.0.1/sys-clk-2.0.1-21fix.zip",
+          "target_path": "@extract:.",
+          "size_bytes": 3325359
+        }
+      ],
+      "assets_map": {
+        "sys-clk-overlay.ovl": "switch/.overlays/sys-clk-overlay.ovl",
+        "lang.zip": "@extract:config/sys-clk/lang"
+      },
+      "cleanup_paths": [
+        "atmosphere/contents/00FF0000636C6BFF",
+        "switch/sys-clk-manager.nro",
+        "switch/.overlays/sys-clk-overlay.ovl",
+        "config/sys-clk"
+      ],
+      "compatibility_matrix": [
+        {
+          "tag": "2.0.1+r28",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "assets": [
+            {
+              "asset_name": "sys-clk-2.0.1-21fix.zip",
+              "download_url": "https://github.com/retronx-team/sys-clk/releases/download/2.0.1/sys-clk-2.0.1-21fix.zip",
+              "target_path": "@extract:.",
+              "size_bytes": 3325359
+            },
+            {
+              "asset_name": "sys-clk-overlay.ovl",
+              "download_url": "https://github.com/ppkantorski/sys-clk/releases/download/2.0.1%2Br28/sys-clk-overlay.ovl",
+              "target_path": "switch/.overlays/sys-clk-overlay.ovl",
+              "size_bytes": 720956
+            },
+            {
+              "asset_name": "lang.zip",
+              "download_url": "https://github.com/ppkantorski/sys-clk/releases/download/2.0.1%2Br28/lang.zip",
+              "target_path": "@extract:config/sys-clk/lang",
+              "size_bytes": 17989
+            }
+          ],
+          "size_bytes": 4064304
+        },
+        {
+          "tag": "2.0.1+r27",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "assets": [
+            {
+              "asset_name": "sys-clk-2.0.1-21fix.zip",
+              "download_url": "https://github.com/retronx-team/sys-clk/releases/download/2.0.1/sys-clk-2.0.1-21fix.zip",
+              "target_path": "@extract:.",
+              "size_bytes": 3325359
+            },
+            {
+              "asset_name": "sys-clk-overlay.ovl",
+              "download_url": "https://github.com/ppkantorski/sys-clk/releases/download/2.0.1%2Br27/sys-clk-overlay.ovl",
+              "target_path": "switch/.overlays/sys-clk-overlay.ovl",
+              "size_bytes": 761916
+            },
+            {
+              "asset_name": "lang.zip",
+              "download_url": "https://github.com/ppkantorski/sys-clk/releases/download/2.0.1%2Br27/lang.zip",
+              "target_path": "@extract:config/sys-clk/lang",
+              "size_bytes": 17919
+            }
+          ],
+          "size_bytes": 4105194
+        }
+      ]
+    },
+    {
+      "id": "fizeau",
+      "name": "Fizeau",
+      "name_en": "Fizeau",
+      "category": "Sysmodule / Pantalla",
+      "category_en": "Sysmodule / Display",
+      "description": "Ajusta el color, temperatura, saturación, contraste, filtro de luz azul y modo noche de la pantalla de tu Nintendo Switch en tiempo real.",
+      "description_en": "Adjust color temperature, saturation, contrast, blue light filter and night mode on your Nintendo Switch screen in real time.",
+      "repo": "averne/Fizeau",
+      "default_selected": false,
+      "included_in_base": false,
+      "install_type": "extract_zip_root",
+      "asset_pattern": "Fizeau-*.zip",
+      "cleanup_paths": [
+        "atmosphere/contents/0100000000000F12",
+        "atmosphere/exefs_patches/nvnflinger_cmu",
+        "config/Fizeau",
+        "switch/Fizeau",
+        "switch/.overlays/Fizeau.ovl"
+      ],
+      "compatibility_matrix": [
+        {
+          "tag": "v2.8.3",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "asset_name": "Fizeau-2.8.3-5bf3f0d.zip",
+          "download_url": "https://github.com/averne/Fizeau/releases/download/v2.8.3/Fizeau-2.8.3-5bf3f0d.zip",
+          "size_bytes": 1536484
+        },
+        {
+          "tag": "v2.8.2",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "asset_name": "Fizeau-2.8.2-309b628.zip",
+          "download_url": "https://github.com/averne/Fizeau/releases/download/v2.8.2/Fizeau-2.8.2-309b628.zip",
+          "size_bytes": 1516830
+        }
+      ]
+    },
+    {
+      "id": "sysdvr",
+      "name": "SysDVR",
+      "name_en": "SysDVR",
+      "category": "Sysmodule / Streaming",
+      "category_en": "Sysmodule / Streaming",
+      "description": "Transmite el vídeo y audio de tus juegos de Switch al PC o Android por cable USB o red Wi-Fi sin necesidad de capturadora.",
+      "description_en": "Stream game video and audio from your Switch to PC or Android over USB or Wi-Fi network without a capture card.",
+      "repo": "exelix11/SysDVR",
+      "default_selected": false,
+      "included_in_base": false,
+      "install_type": "extract_zip_root",
+      "asset_pattern": "SysDVR.zip",
+      "cleanup_paths": [
+        "atmosphere/contents/00FF0000A53BB665",
+        "config/sysdvr",
+        "switch/SysDVR-conf.nro"
+      ],
+      "compatibility_matrix": [
+        {
+          "tag": "v6.3",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "asset_name": "SysDVR.zip",
+          "download_url": "https://github.com/exelix11/SysDVR/releases/download/v6.3/SysDVR.zip",
+          "size_bytes": 3196237
+        },
+        {
+          "tag": "v6.2.2",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "asset_name": "SysDVR.zip",
+          "download_url": "https://github.com/exelix11/SysDVR/releases/download/v6.2.2/SysDVR.zip",
+          "size_bytes": 3176728
+        }
+      ]
+    },
+    {
+      "id": "switch_frame_tap",
+      "name": "Switch Frame Tap",
+      "name_en": "Switch Frame Tap",
+      "category": "Sysmodule / Streaming",
+      "category_en": "Sysmodule / Streaming",
+      "description": "Juega y transmite tu Switch o Switch Lite en el PC hasta 1080p60 con sonido por USB-C o red, graba MP4 y haz capturas en resolución nativa.",
+      "description_en": "Stream your Switch or Switch Lite to PC at up to 1080p60 with sound over USB-C or network, record MP4 and take native screenshots.",
+      "repo": "TomasUribe/switch-frame-tap",
+      "default_selected": false,
+      "included_in_base": false,
+      "install_type": "extract_zip_root",
+      "asset_pattern": "switch-frame-tap-*-switch.zip",
+      "cleanup_paths": [
+        "atmosphere/contents/0100000000000C20",
+        "atmosphere/contents/0100000000000C21",
+        "switch/.overlays/switch-frame-tap.ovl",
+        "switch/switch-frame-tap",
+        "config/switch-frame-tap"
+      ],
+      "compatibility_matrix": [
+        {
+          "tag": "v0.7.13.2",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "asset_name": "switch-frame-tap-0.7.13.2-switch.zip",
+          "download_url": "https://github.com/TomasUribe/switch-frame-tap/releases/download/v0.7.13.2/switch-frame-tap-0.7.13.2-switch.zip",
+          "size_bytes": 4593174
+        },
+        {
+          "tag": "v0.7.13.1",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "asset_name": "switch-frame-tap-0.7.13.1-switch.zip",
+          "download_url": "https://github.com/TomasUribe/switch-frame-tap/releases/download/v0.7.13.1/switch-frame-tap-0.7.13.1-switch.zip",
+          "size_bytes": 4592646
         }
       ]
     }

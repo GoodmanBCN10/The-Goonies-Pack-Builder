@@ -43,6 +43,10 @@
 | **Sphaira** | [`ITotalJustice/sphaira`](https://github.com/ITotalJustice/sphaira) | Homebrew Menu avanzado con gestor de archivos y temas |
 | **TICO** | [`ticohq/tico`](https://github.com/ticohq/tico) | Frontend de emulación personalizado para Nintendo Switch con tienda de módulos |
 | **Ultrahand Overlay** | [`ppkantorski/Ultrahand-Overlay`](https://github.com/ppkantorski/Ultrahand-Overlay) | Menú overlay personalizable en partida |
+| **sys-clk** | [`ppkantorski/sys-clk`](https://github.com/ppkantorski/sys-clk) | Sysmodule y overlay (`libultrahand`) de overclock/underclock de CPU, GPU y RAM |
+| **Fizeau** | [`averne/Fizeau`](https://github.com/averne/Fizeau) | Gestión de color, temperatura, contraste y filtro de luz azul en pantalla |
+| **SysDVR** | [`exelix11/SysDVR`](https://github.com/exelix11/SysDVR) | Streaming de vídeo y audio de juegos al PC o móvil por USB o red |
+| **Switch Frame Tap** | [`TomasUribe/switch-frame-tap`](https://github.com/TomasUribe/switch-frame-tap) | Streaming a 1080p60 con sonido por USB-C o red, grabación MP4 y capturas nativas |
 | **JKSV** | [`J-D-K/JKSV`](https://github.com/J-D-K/JKSV) | Gestor de partidas guardadas (saves) |
 | **Linkalho** | [`impeeza/linkalho`](https://github.com/impeeza/linkalho) | Vinculación offline de cuentas Nintendo |
 | **DBI (Ruso)** | [`rashevskyv/dbi`](https://github.com/rashevskyv/dbi) | Última versión oficial en ruso (si no se marca, se conserva DBI en español del Pack Base) |
