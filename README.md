@@ -41,6 +41,7 @@
 | **90DNS Setter** | [`suchmememanyskill/switch-90dns-setter`](https://github.com/suchmememanyskill/switch-90dns-setter) | Configuración automática de servidores 90DNS en todas las redes Wi-Fi guardadas |
 | **90DNS Tester** | [`meganukebmp/Switch_90DNS_tester`](https://github.com/meganukebmp/Switch_90DNS_tester) | Verificación del bloqueo de dominios y servidores de Nintendo |
 | **Sphaira** | [`ITotalJustice/sphaira`](https://github.com/ITotalJustice/sphaira) | Homebrew Menu avanzado con gestor de archivos y temas |
+| **TICO** | [`ticohq/tico`](https://github.com/ticohq/tico) | Frontend de emulación personalizado para Nintendo Switch con tienda de módulos |
 | **Ultrahand Overlay** | [`ppkantorski/Ultrahand-Overlay`](https://github.com/ppkantorski/Ultrahand-Overlay) | Menú overlay personalizable en partida |
 | **JKSV** | [`J-D-K/JKSV`](https://github.com/J-D-K/JKSV) | Gestor de partidas guardadas (saves) |
 | **Linkalho** | [`impeeza/linkalho`](https://github.com/impeeza/linkalho) | Vinculación offline de cuentas Nintendo |

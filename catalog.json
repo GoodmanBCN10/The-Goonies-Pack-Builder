@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.4.0",
+  "schema_version": "1.5.0",
   "project_name": "The Goonies Pack Builder",
   "default_firmware": "23.0.1",
   "always_latest_by_default": true,
@@ -409,6 +409,43 @@
           "asset_name": "Switch_90DNS_tester.nro",
           "download_url": "https://github.com/meganukebmp/Switch_90DNS_tester/releases/download/v1.1.0/Switch_90DNS_tester.nro",
           "size_bytes": 255950
+        }
+      ]
+    },
+    {
+      "id": "tico",
+      "name": "TICO",
+      "name_en": "TICO",
+      "category": "Emulación / Menú",
+      "category_en": "Emulation / Frontend",
+      "description": "El primer frontend de emulación personalizado para Nintendo Switch. Interfaz diseñada para mando, rápida, sencilla y con tienda de módulos integrada.",
+      "description_en": "The first custom emulation frontend for Nintendo Switch. A controller-first interface built for performance, simplicity and a built-in module store.",
+      "repo": "ticohq/tico",
+      "default_selected": false,
+      "included_in_base": false,
+      "install_type": "copy_asset",
+      "asset_pattern": "tico.nro",
+      "target_path": "switch/tico.nro",
+      "cleanup_paths": [
+        "switch/tico.nro",
+        "switch/tico"
+      ],
+      "compatibility_matrix": [
+        {
+          "tag": "0.8.0",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "asset_name": "tico.nro",
+          "download_url": "https://github.com/ticohq/tico/releases/download/0.8.0/tico.nro",
+          "size_bytes": 42588986
+        },
+        {
+          "tag": "0.7.9",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "asset_name": "tico.nro",
+          "download_url": "https://github.com/ticohq/tico/releases/download/0.7.9/tico.nro",
+          "size_bytes": 42747091
         }
       ]
     }
