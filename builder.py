@@ -1034,7 +1034,7 @@ class PackBuilderEngine:
             with self._lock:
                 self.status["running"] = False
             self.log(
-                f"¡Instalación completada en {sd_root}! Ya puedes pulsar 'Close UMS' en Hekate.",
+                f'¡Instalación completada en {sd_root}! Ya puedes desconectar la consola desde el botón "Desconectar consola" o desde "Quitar hardware de forma segura" en la barra de tareas de Windows.',
                 progress=100,
                 step="completed",
             )
