@@ -1,3 +1,4 @@
+import concurrent.futures
 import ctypes
 import fnmatch
 import json
@@ -23,6 +24,7 @@ else:
 
 INTERNAL_CATALOG_PATH = BUNDLE_DIR / "catalog.json"
 USER_CATALOG_PATH = BASE_DIR / ".cache" / "catalog_user.json"
+GH_HTTP_CACHE_PATH = BASE_DIR / ".cache" / "gh_http_cache.json"
 CACHE_DIR = BASE_DIR / ".cache" / "downloads"
 
 # Carpetas que NUNCA se deben borrar en la raíz de la microSD
@@ -42,7 +44,9 @@ def parse_version(v_str: str) -> Tuple[int, ...]:
     if date_match:
         mm, dd, yyyy = int(date_match.group(1)), int(date_match.group(2)), int(date_match.group(3))
         return (yyyy, mm, dd)
-    nums = re.findall(r"\d+", cleaned)
+    # Ignorar sufijos pre-release (-beta1, -alpha, -test) para que 0.7.14 sea mayor que 0.7.14-beta1
+    base_part = re.split(r"-(?:alpha|beta|test|rc)", cleaned, flags=re.I)[0]
+    nums = re.findall(r"\d+", base_part)
     if not nums:
         return (0,)
     return tuple(int(n) for n in nums)
@@ -327,14 +331,32 @@ class PackBuilderEngine:
         return self._is_cache_key_present(f"{item_id}_{rel['tag']}_{asset_name}")
 
     def resolve_for_firmware(
-        self, target_fw: str, base_pack_tag: Optional[str] = None
+        self, target_fw: Optional[str] = None, base_pack_tag: Optional[str] = None
     ) -> Dict[str, Any]:
         cat = self.load_catalog()
-        base_releases = cat["base_pack_source"]["known_releases"]
+        always_latest = cat.get("always_latest_by_default", True)
 
-        # 1. Resolver Pack Base (Por defecto siempre el último disponible, ej. v1.18)
+        raw_fw_releases = cat["firmware_source"]["known_releases"]
+        fw_releases = (
+            sorted(raw_fw_releases, key=lambda f: parse_version(f.get("version") or f.get("tag", "")), reverse=True)
+            if always_latest
+            else list(raw_fw_releases)
+        )
+
+        raw_base_releases = cat["base_pack_source"]["known_releases"]
+        base_releases = (
+            sorted(raw_base_releases, key=lambda b: parse_version(b.get("tag", "")), reverse=True)
+            if always_latest
+            else list(raw_base_releases)
+        )
+
+        # Si no se especificó un firmware concreto, usar siempre el último disponible
+        if not target_fw or target_fw in ("latest", "auto"):
+            target_fw = fw_releases[0]["version"] if fw_releases else cat.get("default_firmware", "23.0.1")
+
+        # 1. Resolver Pack Base (Por defecto siempre el último disponible, ej. v1.19)
         selected_base = None
-        if base_pack_tag and base_pack_tag != "auto":
+        if base_pack_tag and base_pack_tag not in ("auto", "latest", ""):
             for b in base_releases:
                 if b["tag"] == base_pack_tag:
                     selected_base = b
@@ -373,7 +395,7 @@ class PackBuilderEngine:
 
         # 2. Resolver Firmware seleccionado
         selected_fw_obj = None
-        for fw in cat["firmware_source"]["known_releases"]:
+        for fw in fw_releases:
             if fw["version"] == target_fw or fw["tag"] == target_fw:
                 selected_fw_obj = {
                     **fw,
@@ -382,9 +404,15 @@ class PackBuilderEngine:
                     ),
                 }
                 break
+        if not selected_fw_obj and fw_releases:
+            fw0 = fw_releases[0]
+            target_fw = fw0["version"]
+            selected_fw_obj = {
+                **fw0,
+                "is_cached": self._is_cache_key_present(f"fw_{fw0['tag']}_{fw0['asset_name']}"),
+            }
 
         # 3. Resolver Apps compatibles con (target_fw, atmo_ver), ordenando siempre de MAYOR a MENOR versión
-        always_latest = cat.get("always_latest_by_default", True)
         resolved_apps = []
         for app in cat.get("apps", []):
             raw_matrix = app.get("compatibility_matrix", [])
@@ -464,118 +492,177 @@ class PackBuilderEngine:
             "fw_incompatibility_msg": fw_incompatibility_msg,
             "apps": resolved_apps,
             "payloads": resolved_payloads,
-            "all_firmwares": cat["firmware_source"]["known_releases"],
+            "all_firmwares": fw_releases,
             "all_base_packs": base_releases,
             "sd_drives": list_sd_drives(),
         }
 
-    def sync_with_github(self) -> Dict[str, Any]:
-        cat = self.load_catalog()
-        headers = {"User-Agent": "TheGooniesCreatorPack/1.0"}
-        updated_items = []
+    def _load_gh_http_cache(self) -> Dict[str, Any]:
+        if GH_HTTP_CACHE_PATH.exists():
+            try:
+                return json.loads(GH_HTTP_CACHE_PATH.read_text(encoding="utf-8"))
+            except Exception:
+                pass
+        return {}
 
-        fw_repo = cat["firmware_source"]["repo"]
+    def _save_gh_http_cache(self, cache_obj: Dict[str, Any]) -> None:
         try:
-            r = requests.get(f"https://api.github.com/repos/{fw_repo}/releases?per_page=10", headers=headers, timeout=10)
-            if r.status_code == 200:
-                known_tags = {x["tag"] for x in cat["firmware_source"]["known_releases"]}
-                new_fws = []
-                for rel in r.json():
-                    tag = rel.get("tag_name", "")
-                    assets = rel.get("assets", [])
-                    if not assets:
-                        continue
-                    if tag not in known_tags:
-                        new_fws.append({
-                            "tag": tag,
-                            "version": tag.lstrip("vV"),
-                            "name": f"Firmware {tag.lstrip('vV')}",
-                            "asset_name": assets[0]["name"],
-                            "download_url": assets[0]["browser_download_url"],
-                            "size_bytes": assets[0].get("size", 0),
-                        })
-                        updated_items.append(f"Firmware {tag}")
-                if new_fws:
-                    cat["firmware_source"]["known_releases"] = new_fws + cat["firmware_source"]["known_releases"]
-                    cat["default_firmware"] = cat["firmware_source"]["known_releases"][0]["version"]
+            GH_HTTP_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+            GH_HTTP_CACHE_PATH.write_text(json.dumps(cache_obj, ensure_ascii=False), encoding="utf-8")
         except Exception:
             pass
 
-        base_repo = cat["base_pack_source"]["repo"]
+    def _fetch_repo_releases_fast(
+        self, repo: str, per_page: int, http_cache: Dict[str, Any], cache_lock: threading.Lock
+    ) -> List[Dict[str, Any]]:
+        url = f"https://api.github.com/repos/{repo}/releases?per_page={per_page}"
+        headers = {"User-Agent": "TheGooniesPackBuilder/1.0", "Accept": "application/vnd.github+json"}
+        with cache_lock:
+            cached_entry = http_cache.get(repo, {})
+        if cached_entry.get("etag"):
+            headers["If-None-Match"] = cached_entry["etag"]
         try:
-            r = requests.get(f"https://api.github.com/repos/{base_repo}/releases?per_page=5", headers=headers, timeout=10)
+            r = requests.get(url, headers=headers, timeout=6)
+            if r.status_code == 304 and cached_entry.get("data"):
+                return cached_entry["data"]
             if r.status_code == 200:
-                known_tags = {x["tag"] for x in cat["base_pack_source"]["known_releases"]}
-                new_bases = []
-                for rel in r.json():
-                    tag = rel.get("tag_name", "")
-                    assets = rel.get("assets", [])
-                    if not assets or tag in known_tags:
-                        continue
-                    title = rel.get("name", "") or tag
-                    body = rel.get("body", "") or ""
-                    atmo_match = re.search(r"atmosphere\s*v?(\d+\.\d+\.\d+)", f"{title} {body}", re.I)
-                    hek_match = re.search(r"hekate\s*v?(\d+\.\d+\.\d+)", f"{title} {body}", re.I)
-                    atmo_v = atmo_match.group(1) if atmo_match else "1.12.1"
-                    hek_v = hek_match.group(1) if hek_match else "6.5.4"
-                    latest_fw = cat["default_firmware"]
-                    new_bases.append({
+                data = r.json()
+                etag = r.headers.get("ETag")
+                if isinstance(data, list):
+                    with cache_lock:
+                        http_cache[repo] = {"etag": etag, "data": data}
+                    return data
+            if cached_entry.get("data"):
+                return cached_entry["data"]
+        except Exception:
+            if cached_entry.get("data"):
+                return cached_entry["data"]
+        return []
+
+    def sync_with_github(self) -> Dict[str, Any]:
+        cat = self.load_catalog()
+        http_cache = self._load_gh_http_cache()
+        cache_lock = threading.Lock()
+        updated_items = []
+
+        fw_repo = cat["firmware_source"]["repo"]
+        base_repo = cat["base_pack_source"]["repo"]
+
+        # Recopilar todos los repositorios a consultar en paralelo
+        repos_to_query: List[Tuple[str, int]] = [(fw_repo, 10), (base_repo, 5)]
+        for group_key in ("apps", "payloads"):
+            for item in cat.get(group_key, []):
+                repo = item.get("repo")
+                if repo:
+                    repos_to_query.append((repo, 5))
+
+        repo_results: Dict[str, List[Dict[str, Any]]] = {}
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
+            future_map = {
+                pool.submit(self._fetch_repo_releases_fast, repo, per_page, http_cache, cache_lock): repo
+                for repo, per_page in repos_to_query
+            }
+            for fut in concurrent.futures.as_completed(future_map):
+                repo_name = future_map[fut]
+                try:
+                    repo_results[repo_name] = fut.result()
+                except Exception:
+                    repo_results[repo_name] = []
+
+        self._save_gh_http_cache(http_cache)
+
+        # 1. Procesar Firmware
+        fw_releases_gh = repo_results.get(fw_repo, [])
+        if fw_releases_gh:
+            known_tags = {x["tag"] for x in cat["firmware_source"]["known_releases"]}
+            new_fws = []
+            for rel in fw_releases_gh:
+                tag = rel.get("tag_name", "")
+                assets = rel.get("assets", [])
+                if not assets or not tag:
+                    continue
+                if tag not in known_tags:
+                    new_fws.append({
                         "tag": tag,
-                        "name": f"The Goonies OS {tag} (Atmosphere {atmo_v} / Hekate {hek_v})",
-                        "atmosphere": atmo_v,
-                        "hekate": hek_v,
-                        "min_fw": "1.0.0",
-                        "max_fw": latest_fw,
-                        "recommended_for_fw": [latest_fw],
+                        "version": tag.lstrip("vV"),
+                        "name": f"Firmware {tag.lstrip('vV')}",
                         "asset_name": assets[0]["name"],
                         "download_url": assets[0]["browser_download_url"],
                         "size_bytes": assets[0].get("size", 0),
                     })
-                    updated_items.append(f"The Goonies OS {tag}")
-                if new_bases:
-                    cat["base_pack_source"]["known_releases"] = new_bases + cat["base_pack_source"]["known_releases"]
-        except Exception:
-            pass
+                    updated_items.append(f"Firmware {tag}")
+            if new_fws:
+                merged_fws = new_fws + cat["firmware_source"]["known_releases"]
+                merged_fws.sort(key=lambda f: parse_version(f.get("version") or f.get("tag", "")), reverse=True)
+                cat["firmware_source"]["known_releases"] = merged_fws
+                cat["default_firmware"] = merged_fws[0]["version"]
 
+        # 2. Procesar Pack Base (The Goonies OS)
+        base_releases_gh = repo_results.get(base_repo, [])
+        if base_releases_gh:
+            known_tags = {x["tag"] for x in cat["base_pack_source"]["known_releases"]}
+            new_bases = []
+            for rel in base_releases_gh:
+                tag = rel.get("tag_name", "")
+                assets = rel.get("assets", [])
+                if not assets or not tag or tag in known_tags:
+                    continue
+                title = rel.get("name", "") or tag
+                body = rel.get("body", "") or ""
+                atmo_match = re.search(r"atmosphere\s*v?(\d+\.\d+\.\d+)", f"{title} {body}", re.I)
+                hek_match = re.search(r"hekate\s*v?(\d+\.\d+\.\d+)", f"{title} {body}", re.I)
+                atmo_v = atmo_match.group(1) if atmo_match else "1.12.1"
+                hek_v = hek_match.group(1) if hek_match else "6.5.4"
+                latest_fw = cat["firmware_source"]["known_releases"][0]["version"]
+                new_bases.append({
+                    "tag": tag,
+                    "name": f"The Goonies OS {tag} (Atmosphere {atmo_v} / Hekate {hek_v})",
+                    "atmosphere": atmo_v,
+                    "hekate": hek_v,
+                    "min_fw": "1.0.0",
+                    "max_fw": latest_fw,
+                    "recommended_for_fw": [latest_fw],
+                    "asset_name": assets[0]["name"],
+                    "download_url": assets[0]["browser_download_url"],
+                    "size_bytes": assets[0].get("size", 0),
+                })
+                updated_items.append(f"The Goonies OS {tag}")
+            if new_bases:
+                merged_bases = new_bases + cat["base_pack_source"]["known_releases"]
+                merged_bases.sort(key=lambda b: parse_version(b.get("tag", "")), reverse=True)
+                cat["base_pack_source"]["known_releases"] = merged_bases
+
+        # 3. Procesar Aplicaciones y Payloads
         for group_key in ("apps", "payloads"):
             for item in cat.get(group_key, []):
                 repo = item.get("repo")
                 if not repo:
                     continue
-                try:
-                    r = requests.get(
-                        f"https://api.github.com/repos/{repo}/releases?per_page=3", headers=headers, timeout=8
-                    )
-                    if r.status_code != 200:
-                        continue
-                    releases = r.json()
-                    if not releases:
-                        continue
-                    # Buscar entre las releases estables de GitHub la de mayor número de versión
-                    non_beta = [
-                        rel_item
-                        for rel_item in releases
-                        if not rel_item.get("draft")
-                        and not re.search(r"-(alpha|beta|test)", rel_item.get("tag_name", ""), re.I)
-                    ]
-                    candidate_releases = non_beta if non_beta else releases
-                    releases_sorted = sorted(
-                        candidate_releases, key=lambda x: parse_version(x.get("tag_name", "")), reverse=True
-                    )
-                    latest_rel = releases_sorted[0]
-                    tag = latest_rel.get("tag_name", "")
-                    existing_matrix = item.get("compatibility_matrix", [])
-                    known_tags = {m["tag"] for m in existing_matrix}
-                    max_known_ver = max((parse_version(m["tag"]) for m in existing_matrix), default=(0,))
-                    if tag and tag not in known_tags and parse_version(tag) >= max_known_ver:
-                        entry = self._build_matrix_entry_from_gh_release(item, latest_rel)
-                        if entry:
-                            existing_matrix.insert(0, entry)
-                            existing_matrix.sort(key=lambda m: parse_version(m.get("tag", "")), reverse=True)
-                            item["compatibility_matrix"] = existing_matrix
-                            updated_items.append(f"{item['name']} ({tag})")
-                except Exception:
+                releases = repo_results.get(repo, [])
+                if not releases:
                     continue
+                non_beta = [
+                    rel_item
+                    for rel_item in releases
+                    if not rel_item.get("draft")
+                    and not re.search(r"-(alpha|beta|test)", rel_item.get("tag_name", ""), re.I)
+                ]
+                candidate_releases = non_beta if non_beta else releases
+                releases_sorted = sorted(
+                    candidate_releases, key=lambda x: parse_version(x.get("tag_name", "")), reverse=True
+                )
+                latest_rel = releases_sorted[0]
+                tag = latest_rel.get("tag_name", "")
+                existing_matrix = item.get("compatibility_matrix", [])
+                known_tags = {m["tag"] for m in existing_matrix}
+                max_known_ver = max((parse_version(m["tag"]) for m in existing_matrix), default=(0,))
+                if tag and tag not in known_tags and parse_version(tag) >= max_known_ver:
+                    entry = self._build_matrix_entry_from_gh_release(item, latest_rel)
+                    if entry:
+                        existing_matrix.insert(0, entry)
+                        existing_matrix.sort(key=lambda m: parse_version(m.get("tag", "")), reverse=True)
+                        item["compatibility_matrix"] = existing_matrix
+                        updated_items.append(f"{item['name']} ({tag})")
 
         if updated_items:
             self.save_catalog(cat)

@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.6.0",
+  "schema_version": "1.7.0",
   "project_name": "The Goonies Pack Builder",
   "default_firmware": "23.0.1",
   "always_latest_by_default": true,
@@ -36,6 +36,18 @@
   "base_pack_source": {
     "repo": "GoodmanBCN10/The-Goonies-OS-for-Switch",
     "known_releases": [
+      {
+        "tag": "v1.19",
+        "name": "The Goonies OS v1.19 (Atmosphere 1.12.1 / Hekate 6.5.4)",
+        "atmosphere": "1.12.1",
+        "hekate": "6.5.4",
+        "min_fw": "1.0.0",
+        "max_fw": "23.0.1",
+        "recommended_for_fw": ["23.0.1"],
+        "asset_name": "Pack.The.Goonies.v1.19.zip",
+        "download_url": "https://github.com/GoodmanBCN10/The-Goonies-OS-for-Switch/releases/download/v1.19/Pack.The.Goonies.v1.19.zip",
+        "size_bytes": 75937288
+      },
       {
         "tag": "v1.18",
         "name": "The Goonies OS v1.18 (Atmosphere 1.12.1 / Hekate 6.5.4)",
@@ -146,6 +158,14 @@
         "switch/nextendo"
       ],
       "compatibility_matrix": [
+        {
+          "tag": "v4.0.8",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "asset_name": "nextendo.nro",
+          "download_url": "https://github.com/NextendoNetwork/Prelude-Nextendo/releases/download/v4.0.8/nextendo.nro",
+          "size_bytes": 25054996
+        },
         {
           "tag": "v4.0.7",
           "min_fw": "1.0.0",
@@ -639,6 +659,14 @@
         "config/switch-frame-tap"
       ],
       "compatibility_matrix": [
+        {
+          "tag": "v0.7.14",
+          "min_fw": "1.0.0",
+          "max_fw": "99.0.0",
+          "asset_name": "switch-frame-tap-0.7.14-switch.zip",
+          "download_url": "https://github.com/TomasUribe/switch-frame-tap/releases/download/v0.7.14/switch-frame-tap-0.7.14-switch.zip",
+          "size_bytes": 4639996
+        },
         {
           "tag": "v0.7.13.2",
           "min_fw": "1.0.0",

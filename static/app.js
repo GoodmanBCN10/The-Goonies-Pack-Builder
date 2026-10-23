@@ -297,8 +297,11 @@ const I18N = {
 
 const state = {
   lang: "es",
-  targetFirmware: "23.0.1",
-  basePackTag: "v1.18",
+  targetFirmware: "",
+  basePackTag: "",
+  userChangedFw: false,
+  userChangedBase: false,
+  ghSyncApplied: false,
   includeFirmwareFiles: true,
   selectedApps: new Set(),
   selectedPayloads: new Set(),
@@ -496,13 +499,17 @@ function applyStaticTranslations() {
 
 async function fetchState(preserveSelection = true) {
   const qs = new URLSearchParams({
-    fw: state.targetFirmware,
-    base: state.basePackTag,
+    fw: state.userChangedFw ? state.targetFirmware : "",
+    base: state.userChangedBase ? state.basePackTag : "",
   });
   const res = await fetch(`/api/state?${qs.toString()}`);
   const data = await res.json();
   state.catalogData = data;
   state.sdDrives = data.sd_drives || [];
+  state.targetFirmware = data.target_firmware;
+  if (!state.userChangedBase || state.basePackTag !== "auto") {
+    state.basePackTag = data.base_pack ? data.base_pack.tag : "";
+  }
 
   document.getElementById("cacheInfoText").textContent = t().cacheInfo(
     data.cache_size_mb,
@@ -520,6 +527,27 @@ async function fetchState(preserveSelection = true) {
   renderSdDrives(state.sdDrives);
   renderAllGrids();
   renderSummary(data);
+
+  if (data.gh_sync && data.gh_sync.checking) {
+    setTimeout(waitForStartupGhSync, 600);
+  } else if (data.gh_sync && data.gh_sync.checked) {
+    state.ghSyncApplied = true;
+  }
+}
+
+async function waitForStartupGhSync() {
+  if (state.ghSyncApplied) return;
+  try {
+    const res = await fetch("/api/state?fw=&base=");
+    const data = await res.json();
+    if (data.gh_sync && data.gh_sync.checking) {
+      setTimeout(waitForStartupGhSync, 600);
+      return;
+    }
+    state.ghSyncApplied = true;
+    state.customVersions = {};
+    await fetchState(true);
+  } catch (_) {}
 }
 
 function updateGhSyncIndicator(ghSync) {
@@ -581,13 +609,20 @@ function updatePresetButtonsUI() {
 async function refreshDrivesOnly() {
   if (state.pollTimer) return;
   try {
+    const fwParam = state.userChangedFw ? state.targetFirmware : "";
+    const baseParam = state.userChangedBase ? state.basePackTag : "";
     const res = await fetch(
-      `/api/state?fw=${encodeURIComponent(state.targetFirmware)}&base=${encodeURIComponent(state.basePackTag)}`
+      `/api/state?fw=${encodeURIComponent(fwParam)}&base=${encodeURIComponent(baseParam)}`
     );
     const data = await res.json();
     state.sdDrives = data.sd_drives || [];
     renderSdDrives(state.sdDrives);
     updateGhSyncIndicator(data.gh_sync);
+    if (!state.ghSyncApplied && data.gh_sync && data.gh_sync.checked) {
+      state.ghSyncApplied = true;
+      state.customVersions = {};
+      await fetchState(true);
+    }
   } catch (_) {}
 }
 
@@ -1131,12 +1166,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("selectFirmware").addEventListener("change", (e) => {
     state.targetFirmware = e.target.value;
+    state.userChangedFw = true;
     state.customVersions = {};
     fetchState(true);
   });
 
   document.getElementById("selectBasePack").addEventListener("change", (e) => {
     state.basePackTag = e.target.value;
+    state.userChangedBase = true;
     state.customVersions = {};
     fetchState(true);
   });
@@ -1165,6 +1202,9 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const res = await fetch("/api/sync", { method: "POST", body: "{}" });
       const data = await res.json();
+      state.userChangedFw = false;
+      state.userChangedBase = false;
+      state.customVersions = {};
       await fetchState(true);
       if (data.count > 0) {
         alert(t().syncTooltipUpdates(data.updated));

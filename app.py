@@ -45,8 +45,8 @@ class CreatorRequestHandler(SimpleHTTPRequestHandler):
 
         if path == "/api/state":
             qs = parse_qs(parsed.query)
-            fw = qs.get("fw", [engine.catalog.get("default_firmware", "23.0.1")])[0]
-            base_tag = qs.get("base", ["v1.18"])[0]
+            fw = qs.get("fw", [""])[0]
+            base_tag = qs.get("base", [""])[0]
             resolved = engine.resolve_for_firmware(fw, base_tag)
             cache_files = list(CACHE_DIR.glob("*")) if CACHE_DIR.exists() else []
             cache_size = sum(f.stat().st_size for f in cache_files if f.is_file())
