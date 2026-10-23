@@ -555,19 +555,17 @@ function updateGhSyncIndicator(ghSync) {
   const btn = document.getElementById("btnSyncGh");
   const lbl = document.getElementById("syncBtnLabel");
   const tr = t();
+  dot.classList.add("hidden");
   if (!ghSync) return;
 
   if (ghSync.checking) {
     lbl.textContent = tr.syncChecking;
-    dot.classList.add("hidden");
-  } else if (ghSync.checked && ghSync.count > 0) {
-    lbl.textContent = tr.syncUpdates(ghSync.count);
-    dot.classList.remove("hidden");
-    btn.title = tr.syncTooltipUpdates(ghSync.updated);
   } else {
     lbl.textContent = tr.syncNormal;
-    dot.classList.add("hidden");
-    btn.title = tr.syncTooltipOk;
+    btn.title =
+      ghSync.checked && ghSync.count > 0
+        ? tr.syncTooltipUpdates(ghSync.updated)
+        : tr.syncTooltipOk;
   }
 }
 

@@ -512,6 +512,62 @@ class PackBuilderEngine:
         except Exception:
             pass
 
+    def _fetch_repo_releases_web_fallback(self, repo: str) -> List[Dict[str, Any]]:
+        """Fallback sin límite de peticiones (no usa api.github.com) mediante redirección /releases/latest y expanded_assets."""
+        from urllib.parse import quote, unquote
+
+        headers = {"User-Agent": "TheGooniesPackBuilder/1.0"}
+        try:
+            r = requests.get(f"https://github.com/{repo}/releases/latest", headers=headers, allow_redirects=True, timeout=6)
+            if r.status_code != 200 or "/tag/" not in r.url:
+                return []
+            tag = unquote(r.url.split("/tag/", 1)[1].split("?")[0].strip("/"))
+            if not tag:
+                return []
+            title_match = re.search(r"<title>([^<]+)</title>", r.text, re.I)
+            page_title = title_match.group(1) if title_match else tag
+
+            r_assets = requests.get(
+                f"https://github.com/{repo}/releases/expanded_assets/{quote(tag, safe='')}",
+                headers=headers,
+                timeout=6,
+            )
+            if r_assets.status_code != 200:
+                return []
+
+            assets = []
+            for row in re.split(r"<li\b", r_assets.text)[1:]:
+                href_m = re.search(r'href="(/[^"]+/releases/download/[^"]+)"', row)
+                if not href_m:
+                    continue
+                rel_href = href_m.group(1)
+                asset_name = unquote(rel_href.rsplit("/", 1)[-1])
+                size_bytes = 0
+                sz_m = re.search(r"([\d.]+)\s*(KB|MB|GB|Bytes|B)\b", row, re.I)
+                if sz_m:
+                    val = float(sz_m.group(1))
+                    unit = sz_m.group(2).upper()
+                    mult = {"GB": 1024**3, "MB": 1024**2, "KB": 1024}.get(unit, 1)
+                    size_bytes = int(val * mult)
+                assets.append({
+                    "name": asset_name,
+                    "browser_download_url": f"https://github.com{rel_href}",
+                    "size": size_bytes,
+                })
+
+            if not assets:
+                return []
+            return [{
+                "tag_name": tag,
+                "name": page_title,
+                "body": page_title,
+                "draft": False,
+                "prerelease": False,
+                "assets": assets,
+            }]
+        except Exception:
+            return []
+
     def _fetch_repo_releases_fast(
         self, repo: str, per_page: int, http_cache: Dict[str, Any], cache_lock: threading.Lock
     ) -> List[Dict[str, Any]]:
@@ -532,9 +588,16 @@ class PackBuilderEngine:
                     with cache_lock:
                         http_cache[repo] = {"etag": etag, "data": data}
                     return data
+            # Si api.github.com devuelve 403 (Rate Limit Exceeded), usar el fallback web sin límite
+            web_rels = self._fetch_repo_releases_web_fallback(repo)
+            if web_rels:
+                return web_rels
             if cached_entry.get("data"):
                 return cached_entry["data"]
         except Exception:
+            web_rels = self._fetch_repo_releases_web_fallback(repo)
+            if web_rels:
+                return web_rels
             if cached_entry.get("data"):
                 return cached_entry["data"]
         return []
