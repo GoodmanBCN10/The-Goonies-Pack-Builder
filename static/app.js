@@ -550,23 +550,8 @@ async function waitForStartupGhSync() {
   } catch (_) {}
 }
 
-function updateGhSyncIndicator(ghSync) {
-  const dot = document.getElementById("syncNotifDot");
-  const btn = document.getElementById("btnSyncGh");
-  const lbl = document.getElementById("syncBtnLabel");
-  const tr = t();
-  dot.classList.add("hidden");
-  if (!ghSync) return;
-
-  if (ghSync.checking) {
-    lbl.textContent = tr.syncChecking;
-  } else {
-    lbl.textContent = tr.syncNormal;
-    btn.title =
-      ghSync.checked && ghSync.count > 0
-        ? tr.syncTooltipUpdates(ghSync.updated)
-        : tr.syncTooltipOk;
-  }
+function updateGhSyncIndicator(_ghSync) {
+  // La sincronización es 100% automática al iniciar
 }
 
 function applyPresetSelection(presetName, data = state.catalogData, rerender = true) {
@@ -1191,30 +1176,6 @@ document.addEventListener("DOMContentLoaded", () => {
     confirmModal.classList.add("hidden")
   );
   document.getElementById("btnAcceptConfirmModal").addEventListener("click", executeBuildPackAfterConfirm);
-
-  document.getElementById("btnSyncGh").addEventListener("click", async () => {
-    const btn = document.getElementById("btnSyncGh");
-    const lbl = document.getElementById("syncBtnLabel");
-    btn.disabled = true;
-    lbl.textContent = t().syncChecking;
-    try {
-      const res = await fetch("/api/sync", { method: "POST", body: "{}" });
-      const data = await res.json();
-      state.userChangedFw = false;
-      state.userChangedBase = false;
-      state.customVersions = {};
-      await fetchState(true);
-      if (data.count > 0) {
-        alert(t().syncTooltipUpdates(data.updated));
-      } else {
-        alert(t().syncTooltipOk);
-      }
-    } catch (e) {
-      alert("Error: " + e);
-    } finally {
-      btn.disabled = false;
-    }
-  });
 
   document.getElementById("btnClearCache").addEventListener("click", async () => {
     await fetch("/api/clear-cache", { method: "POST", body: "{}" });
