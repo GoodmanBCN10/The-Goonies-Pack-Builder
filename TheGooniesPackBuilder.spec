@@ -2,10 +2,10 @@
 
 
 a = Analysis(
-    ['app.py'],
+    ['_entry_boot.py'],
     pathex=[],
     binaries=[],
-    datas=[('static', 'static'), ('catalog.json', '.')],
+    datas=[],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

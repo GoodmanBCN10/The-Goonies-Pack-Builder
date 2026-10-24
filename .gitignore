@@ -2,6 +2,11 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyd
+*.build/
+_vault.py
+_app_core.py
+_entry_boot.py
 
 # PyInstaller build & distribution folders
 build/

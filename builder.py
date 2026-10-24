@@ -23,8 +23,8 @@ else:
     BUNDLE_DIR = BASE_DIR
 
 INTERNAL_CATALOG_PATH = BUNDLE_DIR / "catalog.json"
-USER_CATALOG_PATH = BASE_DIR / ".cache" / "catalog_user.json"
-GH_HTTP_CACHE_PATH = BASE_DIR / ".cache" / "gh_http_cache.json"
+USER_CATALOG_PATH = BASE_DIR / ".cache" / "catalog.bin"
+GH_HTTP_CACHE_PATH = BASE_DIR / ".cache" / "gh_cache.bin"
 CACHE_DIR = BASE_DIR / ".cache" / "downloads"
 
 # Carpetas que NUNCA se deben borrar en la raíz de la microSD
@@ -160,8 +160,7 @@ def list_sd_drives() -> List[Dict[str, Any]]:
 
 def eject_sd_drive(drive_str: str) -> Tuple[bool, str]:
     """
-    Expulsa de forma segura la unidad USB Mass Storage (UMS) en Windows (vaciando buffers y enviando
-    IOCTL_STORAGE_EJECT_MEDIA), lo que hace que Hekate cierre automáticamente la sesión USB en la Switch.
+    Expulsa de forma segura la unidad USB Mass Storage (UMS) en Windows mediante Shell.Application.
     """
     if not drive_str:
         return False, "No hay ninguna unidad seleccionada."
@@ -174,68 +173,6 @@ def eject_sd_drive(drive_str: str) -> Tuple[bool, str]:
     if letter == sys_drive:
         return False, "No se puede expulsar la unidad del sistema."
 
-    # 1. Intentar expulsión directa por Win32 DeviceIoControl (envía comando SCSI Eject a Hekate UMS)
-    GENERIC_READ = 0x80000000
-    GENERIC_WRITE = 0x40000000
-    FILE_SHARE_READ = 0x00000001
-    FILE_SHARE_WRITE = 0x00000002
-    OPEN_EXISTING = 3
-
-    FSCTL_LOCK_VOLUME = 0x00090018
-    FSCTL_DISMOUNT_VOLUME = 0x00090020
-    IOCTL_STORAGE_MEDIA_REMOVAL = 0x002D4804
-    IOCTL_STORAGE_EJECT_MEDIA = 0x002D4808
-
-    device_path = f"\\\\.\\{letter}"
-    k32 = ctypes.windll.kernel32
-    handle = k32.CreateFileW(
-        ctypes.c_wchar_p(device_path),
-        GENERIC_READ | GENERIC_WRITE,
-        FILE_SHARE_READ | FILE_SHARE_WRITE,
-        None,
-        OPEN_EXISTING,
-        0,
-        None,
-    )
-
-    if handle != -1 and handle != 0xFFFFFFFFFFFFFFFF:
-        try:
-            bytes_returned = ctypes.c_ulong(0)
-            k32.FlushFileBuffers(handle)
-
-            # Intentar bloquear volumen (varios reintentos breves por si el antivirus está cerrando handles)
-            locked = False
-            for _ in range(5):
-                if k32.DeviceIoControl(handle, FSCTL_LOCK_VOLUME, None, 0, None, 0, ctypes.byref(bytes_returned), None):
-                    locked = True
-                    break
-                time.sleep(0.2)
-
-            if locked:
-                k32.DeviceIoControl(handle, FSCTL_DISMOUNT_VOLUME, None, 0, None, 0, ctypes.byref(bytes_returned), None)
-
-            # Permitir extracción del medio (PREVENT_MEDIA_REMOVAL = False)
-            pmr = ctypes.c_byte(0)
-            k32.DeviceIoControl(
-                handle,
-                IOCTL_STORAGE_MEDIA_REMOVAL,
-                ctypes.byref(pmr),
-                ctypes.sizeof(pmr),
-                None,
-                0,
-                ctypes.byref(bytes_returned),
-                None,
-            )
-
-            ejected = k32.DeviceIoControl(
-                handle, IOCTL_STORAGE_EJECT_MEDIA, None, 0, None, 0, ctypes.byref(bytes_returned), None
-            )
-            if ejected:
-                return True, f"Consola ({letter}) desconectada de forma segura. Hekate cerrará UMS automáticamente."
-        finally:
-            k32.CloseHandle(handle)
-
-    # 2. Fallback mediante Shell.Application (Eject verb de Windows)
     try:
         import subprocess
 
@@ -245,9 +182,10 @@ def eject_sd_drive(drive_str: str) -> Tuple[bool, str]:
             f"if ($d) {{ $d.InvokeVerb('Eject') }}"
         )
         subprocess.run(["powershell", "-NoProfile", "-WindowStyle", "Hidden", "-Command", ps_cmd], timeout=6)
-        time.sleep(0.6)
-        if not Path(f"{letter}\\").exists():
-            return True, f"Consola ({letter}) desconectada de forma segura."
+        for _ in range(8):
+            time.sleep(0.25)
+            if not Path(f"{letter}\\").exists():
+                return True, f"Consola ({letter}) desconectada de forma segura."
     except Exception:
         pass
 
@@ -279,12 +217,19 @@ class PackBuilderEngine:
         }
 
     def load_catalog(self) -> Dict[str, Any]:
-        with open(INTERNAL_CATALOG_PATH, "r", encoding="utf-8") as f:
-            internal_cat = json.load(f)
+        try:
+            import _vault
+
+            internal_cat = _vault.get_catalog_dict()
+        except Exception:
+            with open(INTERNAL_CATALOG_PATH, "r", encoding="utf-8") as f:
+                internal_cat = json.load(f)
+
         if USER_CATALOG_PATH.exists():
             try:
-                with open(USER_CATALOG_PATH, "r", encoding="utf-8") as f:
-                    user_cat = json.load(f)
+                import _vault
+
+                user_cat = _vault.unseal_cache_data(USER_CATALOG_PATH.read_bytes())
                 if user_cat.get("schema_version") == internal_cat.get("schema_version"):
                     return user_cat
             except Exception:
@@ -293,8 +238,12 @@ class PackBuilderEngine:
 
     def save_catalog(self, data: Dict[str, Any]) -> None:
         USER_CATALOG_PATH.parent.mkdir(parents=True, exist_ok=True)
-        with open(USER_CATALOG_PATH, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
+        try:
+            import _vault
+
+            USER_CATALOG_PATH.write_bytes(_vault.seal_cache_data(data))
+        except Exception:
+            pass
         self.catalog = data
 
     def log(self, msg: str, progress: Optional[int] = None, step: Optional[str] = None) -> None:
@@ -500,15 +449,19 @@ class PackBuilderEngine:
     def _load_gh_http_cache(self) -> Dict[str, Any]:
         if GH_HTTP_CACHE_PATH.exists():
             try:
-                return json.loads(GH_HTTP_CACHE_PATH.read_text(encoding="utf-8"))
+                import _vault
+
+                return _vault.unseal_cache_data(GH_HTTP_CACHE_PATH.read_bytes())
             except Exception:
                 pass
         return {}
 
     def _save_gh_http_cache(self, cache_obj: Dict[str, Any]) -> None:
         try:
+            import _vault
+
             GH_HTTP_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
-            GH_HTTP_CACHE_PATH.write_text(json.dumps(cache_obj, ensure_ascii=False), encoding="utf-8")
+            GH_HTTP_CACHE_PATH.write_bytes(_vault.seal_cache_data(cache_obj))
         except Exception:
             pass
 

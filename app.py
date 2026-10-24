@@ -1,27 +1,41 @@
 import argparse
 import json
 import os
+import secrets
 import socket
 import subprocess
 import sys
 import threading
 import webbrowser
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.cookies import SimpleCookie
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from builder import BASE_DIR, BUNDLE_DIR, CACHE_DIR, PackBuilderEngine, eject_sd_drive, list_sd_drives
 
 STATIC_DIR = BUNDLE_DIR / "static" if (BUNDLE_DIR / "static").exists() else BASE_DIR / "static"
+SESSION_TOKEN = secrets.token_urlsafe(32)
 engine = PackBuilderEngine()
 
 
-class CreatorRequestHandler(SimpleHTTPRequestHandler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=str(STATIC_DIR), **kwargs)
-
+class CreatorRequestHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
+
+    def _is_authorized(self, parsed_qs: dict) -> bool:
+        if parsed_qs.get("__t", [""])[0] == SESSION_TOKEN:
+            return True
+        cookie_hdr = self.headers.get("Cookie", "")
+        if cookie_hdr:
+            c = SimpleCookie()
+            try:
+                c.load(cookie_hdr)
+                if "__gpb_sid" in c and c["__gpb_sid"].value == SESSION_TOKEN:
+                    return True
+            except Exception:
+                pass
+        return False
 
     def _send_json(self, data: dict, status: int = 200) -> None:
         raw = json.dumps(data, ensure_ascii=False).encode("utf-8")
@@ -29,6 +43,16 @@ class CreatorRequestHandler(SimpleHTTPRequestHandler):
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(raw)))
         self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(raw)
+
+    def _send_bytes(self, raw: bytes, content_type: str, set_session_cookie: bool = False) -> None:
+        self.send_response(200)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(raw)))
+        self.send_header("Cache-Control", "no-store")
+        if set_session_cookie:
+            self.send_header("Set-Cookie", f"__gpb_sid={SESSION_TOKEN}; Path=/; HttpOnly; SameSite=Strict")
         self.end_headers()
         self.wfile.write(raw)
 
@@ -42,9 +66,16 @@ class CreatorRequestHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         parsed = urlparse(self.path)
         path = parsed.path
+        qs = parse_qs(parsed.query)
+
+        if not self._is_authorized(qs):
+            self.send_response(403)
+            self.end_headers()
+            return
+
+        set_cookie = qs.get("__t", [""])[0] == SESSION_TOKEN
 
         if path == "/api/state":
-            qs = parse_qs(parsed.query)
             fw = qs.get("fw", [""])[0]
             base_tag = qs.get("base", [""])[0]
             resolved = engine.resolve_for_firmware(fw, base_tag)
@@ -61,14 +92,45 @@ class CreatorRequestHandler(SimpleHTTPRequestHandler):
         if path == "/api/build/status":
             return self._send_json(engine.status)
 
-        if path == "/" or path == "":
-            self.path = "/index.html"
+        rel_asset = "index.html" if path in ("/", "") else path.lstrip("/")
+        try:
+            import _vault
 
-        return super().do_GET()
+            asset_res = _vault.get_static_asset(rel_asset)
+            if asset_res:
+                raw_bytes, mime = asset_res
+                return self._send_bytes(raw_bytes, mime, set_session_cookie=set_cookie)
+        except Exception:
+            pass
+
+        disk_file = (STATIC_DIR / rel_asset).resolve()
+        if disk_file.is_file() and str(disk_file).startswith(str(STATIC_DIR.resolve())):
+            ext = disk_file.suffix.lower()
+            mime_map = {
+                ".html": "text/html; charset=utf-8",
+                ".js": "application/javascript; charset=utf-8",
+                ".css": "text/css; charset=utf-8",
+                ".png": "image/png",
+                ".ico": "image/x-icon",
+            }
+            return self._send_bytes(
+                disk_file.read_bytes(),
+                mime_map.get(ext, "application/octet-stream"),
+                set_session_cookie=set_cookie,
+            )
+
+        self.send_response(404)
+        self.end_headers()
 
     def do_POST(self):
         parsed = urlparse(self.path)
         path = parsed.path
+        qs = parse_qs(parsed.query)
+
+        if not self._is_authorized(qs):
+            self.send_response(403)
+            self.end_headers()
+            return
 
         try:
             body = self._read_json_body()
@@ -114,10 +176,7 @@ class CreatorRequestHandler(SimpleHTTPRequestHandler):
         return self._send_json({"error": "Ruta no encontrada"}, status=404)
 
 
-def find_free_port(preferred: int = 8765) -> int:
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        if s.connect_ex(("127.0.0.1", preferred)) != 0:
-            return preferred
+def find_free_port() -> int:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(("127.0.0.1", 0))
         return s.getsockname()[1]
@@ -136,10 +195,10 @@ def main():
     parser.add_argument("--port", type=int, default=0, help="Puerto HTTP local")
     args = parser.parse_args()
 
-    port = args.port or find_free_port(8765)
+    port = args.port or find_free_port()
     server = start_server(port)
     engine.start_background_github_sync()
-    url = f"http://127.0.0.1:{port}"
+    url = f"http://127.0.0.1:{port}/?__t={SESSION_TOKEN}"
 
     if args.headless:
         try:
